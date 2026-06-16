@@ -29,4 +29,24 @@ cd $_
 python3.13 -m venv venv
 source venv/bin/activate
 pip install -U pip
+pip install -r requirements.txt
 ```
+
+## Run
+
+```sh
+python3 main.py
+```
+
+## Comprehensive Experimental Combinations
+
+The following table shows all components and variations tested in the RAG system evaluation:
+
+### System Components and Variations
+
+| Component       | Options Tested | Details |
+| :-------------- | :------------- | :------ |
+| **PDF Parsing** | docling        |         |
+|                 | pdfplumber     |         |
+|                 | PyMuPDF        |         |
+|                 | pypdf          |         |
