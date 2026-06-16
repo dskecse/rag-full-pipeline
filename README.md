@@ -15,3 +15,18 @@ A Retrieval-Augmented Generation (RAG) system over PDFs with a comprehensive eva
 9. Pick the best combinations of chunking methods, embedding models and **retrieval methods** (BM25, vector search, hybrid approach).
 10. Attach an LLM to the Retriever using prompt engineering.
 11. Evaluate generated answers using **generation metrics** such as Faithfulness and Relevance.
+
+## Prerequisites
+
+* Git
+* Python 3.13.x
+
+## Setup
+
+```sh
+git clone https://github.com/dskecse/rag-full-pipeline
+cd $_
+python3.13 -m venv venv
+source venv/bin/activate
+pip install -U pip
+```
