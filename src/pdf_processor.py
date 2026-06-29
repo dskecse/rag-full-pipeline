@@ -100,7 +100,7 @@ class PDFProcessor:
             "pypdf": PyPDFParser(),
         }
 
-    def process_pdf(self, pdf_path: str, parser_name: str) -> list[str]:
+    def process_pdf(self, pdf_path: str, parser_name: str) -> list[dict[str, any]]:
         if parser_name not in self.parsers:
             raise ValueError(f"Unknown parser: {parser_name}")
 

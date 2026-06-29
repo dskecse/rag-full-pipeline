@@ -5,8 +5,21 @@ from pprint import pprint
 
 from src.pdf_processor import PDFProcessor
 
+_all_parsers = [
+    "docling",
+    "pdfplumber",
+    "pymupdf",
+    "pypdf",
+]
 
-def save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
+
+def _print_summary(pages: list[str]) -> None:
+    print("First page content:")
+    print("-" * 60)
+    pprint(pages[0])
+
+
+def _save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
     # Create a directory (do not raise if already present)
     os.makedirs(os.path.join("data", "extracted_texts"), exist_ok=True)
 
@@ -20,21 +33,18 @@ def save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
     print(f"Extracted text saved to {output_path}")
 
 
-def extract_text_from_pdf(pdf_path: str = "fy10syb.pdf") -> None:
+def extract_text_from_pdf(pdf_path: str = "fy10syb.pdf", parsers: list[str] = _all_parsers) -> dict[str, list]:
     """
     Extract text from a PDF using different parsers for comparison later.
     """
+    if len(parsers) == 0:
+        raise ValueError("'parsers' param cannot be empty")
 
     processor = PDFProcessor()
 
     print("Testing text extraction from PDF\n")
 
-    parsers = [
-        "docling",
-        "pdfplumber",
-        "pymupdf",
-        "pypdf",
-    ]
+    pages_by_parser = {}
 
     for parser in parsers:
         print(f"\nTesting parser: {parser}")
@@ -44,15 +54,17 @@ def extract_text_from_pdf(pdf_path: str = "fy10syb.pdf") -> None:
                 pdf_path=pdf_path,
                 parser_name=parser
             )
+            pages_by_parser[parser] = pages
 
-            print("First page content:")
-            print("-" * 60)
-            pprint(pages[0])
+            _print_summary(pages=pages)
         except Exception as e:
             print(f"Error with parser {parser}: {e}\n")
 
-        save_extracted_text(pages, parser=parser, orig_filename=pdf_path)
+        _save_extracted_text(pages, parser=parser, orig_filename=pdf_path)
+
+    return pages_by_parser
 
 
 if __name__ == "__main__":
-    extract_text_from_pdf()
+    pdf_path = "fy10syb.pdf"
+    pages_by_parser = extract_text_from_pdf(pdf_path=pdf_path)
