@@ -65,6 +65,26 @@ def extract_text_from_pdf(pdf_path: str = "fy10syb.pdf", parsers: list[str] = _a
     return pages_by_parser
 
 
+def perform_chunking(pages: dict[str, list]):
+    configurations = [
+        {"chunking": "fixed_size", "chunk_size": 128, "overlap_size": 32},
+        # {"chunking": "fixed_size", "chunk_size": 256, "overlap_size": 50},
+        # {"chunking": "fixed_size", "chunk_size": 512, "overlap_size": 100},
+        # {"chunking": "sentence", "max_sentences": 3},
+        # {"chunking": "semantic", "max_tokens": 300},
+    ]
+
+    print("\n\nTesting extracted text chunking")
+
+    chunk_sets = {}
+
+    for parser, pages in pages.items():
+        print(f"\nParser: {parser}")
+        for config in configurations:
+            print(f"Testing chunking configuration: {config}")
+
+
 if __name__ == "__main__":
     pdf_path = "fy10syb.pdf"
     pages_by_parser = extract_text_from_pdf(pdf_path=pdf_path)
+    chunk_sets = perform_chunking(pages=pages_by_parser)
