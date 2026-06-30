@@ -4,6 +4,7 @@ from pathlib import Path
 from pprint import pprint
 
 from src.pdf_processor import PDFProcessor
+from src.chunker import Chunk, Chunker
 
 _all_parsers = [
     "docling",
@@ -65,14 +66,16 @@ def extract_text_from_pdf(pdf_path: str = "fy10syb.pdf", parsers: list[str] = _a
     return pages_by_parser
 
 
-def perform_chunking(pages: dict[str, list]):
+def perform_chunking(pages: dict[str, list]) -> dict[str, list[Chunk]]:
     configurations = [
         {"chunking": "fixed_size", "chunk_size": 128, "overlap_size": 32},
-        # {"chunking": "fixed_size", "chunk_size": 256, "overlap_size": 50},
-        # {"chunking": "fixed_size", "chunk_size": 512, "overlap_size": 100},
+        {"chunking": "fixed_size", "chunk_size": 256, "overlap_size": 50},
+        {"chunking": "fixed_size", "chunk_size": 512, "overlap_size": 100},
         # {"chunking": "sentence", "max_sentences": 3},
         # {"chunking": "semantic", "max_tokens": 300},
     ]
+
+    chunker = Chunker()
 
     print("\n\nTesting extracted text chunking")
 
@@ -82,6 +85,31 @@ def perform_chunking(pages: dict[str, list]):
         print(f"\nParser: {parser}")
         for config in configurations:
             print(f"Testing chunking configuration: {config}")
+
+            # Extract chunking options
+            chunking_options = {k: v for k, v in config.items() if k != "chunking"}
+
+            try:
+                chunks = chunker.chunk_text(
+                    pages=pages,
+                    chunking_method=config["chunking"],
+                    **chunking_options
+                )
+                print("First 2 chunks:")
+                print("-" * 60)
+                pprint(chunks[:2])
+                print()
+
+                config_name = f"{parser}_{config["chunking"]}"
+                if chunking_options:
+                    options = "_".join([f"{k}{v}" for k, v in chunking_options.items()])
+                    config_name += f"_{options}"
+
+                chunk_sets[config_name] = chunks
+            except Exception as e:
+                print(f"Error with configuration {config}: {e}\n")
+
+    return chunk_sets
 
 
 if __name__ == "__main__":
