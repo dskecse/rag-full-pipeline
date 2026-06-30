@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import re
 import uuid
 
 from pydantic import BaseModel
@@ -62,11 +63,67 @@ class FixedSizeChunker(TextChunker):
         return chunks
 
 
+class SentenceChunker(TextChunker):
+    """Chunks text by sentences."""
+
+    def chunk_text(self, pages: list[dict[str, any]],
+                   max_sentences: int = 3) -> list[Chunk]:
+        """Chunk text by sentences."""
+        chunks = []
+        chunk_index = 0
+
+        for page in pages:
+            page_num = page["page_number"]
+            text = page["text"]
+
+            if not text.strip():
+                continue
+
+            sentences = re.split(r'(?<=[.!?])\s+', text)
+            current_chunk = []
+
+            for sentence in sentences:
+                current_chunk.append(sentence.strip())
+
+                if len(current_chunk) >= max_sentences:
+                    chunk_text = " ".join(current_chunk)
+
+                    if chunk_text:
+                        chunk = Chunk(
+                            id=str(uuid.uuid4()),
+                            text=chunk_text,
+                            page_number=page_num,
+                            chunk_index=chunk_index,
+                            method="sentence",
+                        )
+                        chunks.append(chunk)
+                        chunk_index +=1
+
+                    current_chunk = []
+
+            # Handle remaining sentences
+            if len(current_chunk):
+                chunk_text = " ".join(current_chunk)
+
+                if chunk_text:
+                    chunk = Chunk(
+                        id=str(uuid.uuid4()),
+                        text=chunk_text,
+                        page_number=page_num,
+                        chunk_index=chunk_index,
+                        method="sentence",
+                    )
+                    chunks.append(chunk)
+                    chunk_index +=1
+
+        return chunks
+
+
 class Chunker:
     def __init__(self):
         self.chunkers = {
             "fixed_size": FixedSizeChunker(),
-            "sentence": None,
+            "sentence": SentenceChunker(),
             "semantic": None,
         }
 
