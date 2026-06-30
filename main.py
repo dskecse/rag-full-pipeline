@@ -20,6 +20,13 @@ def _print_summary(pages: list[str]) -> None:
     pprint(pages[0])
 
 
+def _print_chunking_summary(chunks: list[Chunk]) -> None:
+    print("First 2 chunks:")
+    print("-" * 60)
+    pprint(chunks[:2])
+    print()
+
+
 def _save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
     # Create a directory (do not raise if already present)
     os.makedirs(os.path.join("data", "extracted_texts"), exist_ok=True)
@@ -95,10 +102,6 @@ def perform_chunking(pages: dict[str, list]) -> dict[str, list[Chunk]]:
                     chunking_method=config["chunking"],
                     **chunking_options
                 )
-                print("First 2 chunks:")
-                print("-" * 60)
-                pprint(chunks[:2])
-                print()
 
                 config_name = f"{parser}_{config["chunking"]}"
                 if chunking_options:
@@ -106,6 +109,8 @@ def perform_chunking(pages: dict[str, list]) -> dict[str, list[Chunk]]:
                     config_name += f"_{options}"
 
                 chunk_sets[config_name] = chunks
+
+                _print_chunking_summary(chunks=chunks)
             except Exception as e:
                 print(f"Error with configuration {config}: {e}\n")
 
