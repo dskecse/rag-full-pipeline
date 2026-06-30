@@ -24,7 +24,6 @@ def _print_chunking_summary(chunks: list[Chunk]) -> None:
     print("First 2 chunks:")
     print("-" * 60)
     pprint(chunks[:2])
-    print()
 
 
 def _save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
@@ -39,6 +38,22 @@ def _save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
         json.dump(pages, file, indent=2, ensure_ascii=False)
 
     print(f"Extracted text saved to {output_path}")
+
+
+def _save_chunks(chunks: list[Chunk], filename: str) -> None:
+    # Create a directory (do not raise if already present)
+    os.makedirs(os.path.join("data", "chunks"), exist_ok=True)
+
+    output_path = os.path.join("data", "chunks", filename)
+
+    serialized_chunks = []
+    for chunk in chunks:
+        serialized_chunks.append(chunk.model_dump())
+
+    with open(output_path, "w", encoding="utf-8") as file:
+        json.dump(serialized_chunks, file, indent=2, ensure_ascii=False)
+
+    print(f"Saved {len(chunks)} chunks to {output_path}")
 
 
 def extract_text_from_pdf(pdf_path: str = "fy10syb.pdf", parsers: list[str] = _all_parsers) -> dict[str, list]:
@@ -91,7 +106,7 @@ def perform_chunking(pages: dict[str, list]) -> dict[str, list[Chunk]]:
     for parser, pages in pages.items():
         print(f"\nParser: {parser}")
         for config in configurations:
-            print(f"Testing chunking configuration: {config}")
+            print(f"\nTesting chunking configuration: {config}")
 
             # Extract chunking options
             chunking_options = {k: v for k, v in config.items() if k != "chunking"}
@@ -111,6 +126,7 @@ def perform_chunking(pages: dict[str, list]) -> dict[str, list[Chunk]]:
                 chunk_sets[config_name] = chunks
 
                 _print_chunking_summary(chunks=chunks)
+                _save_chunks(chunks, filename=f"{config_name}.json")
             except Exception as e:
                 print(f"Error with configuration {config}: {e}\n")
 
