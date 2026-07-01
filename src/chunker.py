@@ -4,6 +4,7 @@ import re
 import uuid
 
 from pydantic import BaseModel
+import spacy
 
 
 class Chunk(BaseModel):
@@ -119,12 +120,88 @@ class SentenceChunker(TextChunker):
         return chunks
 
 
+class SemanticChunker(TextChunker):
+    """Chunks text based on semantic boundaries using spaCy."""
+
+    def __init__(self):
+        try:
+            self.nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            print("Warning: spaCy model 'en_core_web_sm' not found, skipping semantic chunking")
+            print("To download, run:\n\tpython -m spacy download en_core_web_sm")
+            self.nlp = None
+
+    def chunk_text(self, pages: list[dict[str, any]],
+                   max_tokens: int = 300) -> list[Chunk]:
+        """Chunk text based on sematic boundaries."""
+        if not self.nlp:
+            print("Skipping semantic chunking")
+            return []
+
+        chunks = []
+        chunk_index = 0
+
+        for page in pages:
+            page_num = page["page_number"]
+            text = page["text"]
+
+            if not text.strip():
+                continue
+
+            doc = self.nlp(text)
+            sentences = list(doc.sents)
+
+            current_chunk = []
+            current_tokens = 0
+
+            for sentence in sentences:
+                sentence_tokens = len(sentence)
+
+                if current_tokens + sentence_tokens > max_tokens and current_chunk:
+                    # Create chunk from current sentences
+                    chunk_text = " ".join([s.text for s in current_chunk]).strip()
+
+                    if chunk_text:
+                        chunk = Chunk(
+                            id=str(uuid.uuid4()),
+                            text=chunk_text,
+                            page_number=page_num,
+                            chunk_index=chunk_index,
+                            method="semantic",
+                        )
+                        chunks.append(chunk)
+                        chunk_index +=1
+
+                    current_chunk = [sentence]
+                    current_tokens = sentence_tokens
+                else:
+                    current_chunk.append(sentence)
+                    current_tokens += sentence_tokens
+
+            # Handle remaining sentences
+            if current_chunk:
+                chunk_text = " ".join([s.text for s in current_chunk]).strip()
+
+                if chunk_text:
+                    chunk = Chunk(
+                        id=str(uuid.uuid4()),
+                        text=chunk_text,
+                        page_number=page_num,
+                        chunk_index=chunk_index,
+                        method="semantic",
+                    )
+                    chunks.append(chunk)
+                    chunk_index +=1
+
+        return chunks
+
+
 class Chunker:
     def __init__(self):
         self.chunkers = {
             "fixed_size": FixedSizeChunker(),
             "sentence": SentenceChunker(),
-            "semantic": None,
+            "semantic": SemanticChunker(),
         }
 
     def chunk_text(self, pages: list[dict[str, any]],

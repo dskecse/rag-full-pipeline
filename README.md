@@ -30,6 +30,7 @@ python3.13 -m venv venv
 source venv/bin/activate
 pip install -U pip
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 ```
 
 ## Run

@@ -1,3 +1,6 @@
+# Text processing and chunking
+spacy
+
 # PDF processing
 docling
 pdfplumber

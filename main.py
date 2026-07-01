@@ -94,7 +94,7 @@ def perform_chunking(pages: dict[str, list]) -> dict[str, list[Chunk]]:
         {"chunking": "fixed_size", "chunk_size": 256, "overlap_size": 50},
         {"chunking": "fixed_size", "chunk_size": 512, "overlap_size": 100},
         {"chunking": "sentence", "max_sentences": 3},
-        # {"chunking": "semantic", "max_tokens": 300},
+        {"chunking": "semantic", "max_tokens": 300},
     ]
 
     chunker = Chunker()
