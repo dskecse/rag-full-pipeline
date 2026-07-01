@@ -5,7 +5,7 @@ A Retrieval-Augmented Generation (RAG) system over PDFs with a comprehensive eva
 ## TODO
 
 - [x] Parse PDFs using different text-based parsers.
-- [ ] Chunk extracted text with different combination parameters (`chunk_size` + `overlap_size`).
+- [x] Chunk extracted text with different combination parameters (`chunk_size` + `overlap_size`).
 - [ ] Use different embedding models to embed chunks into a vector DB.
 - [ ] Generate a synthetic dataset of questions from chunks using LLM and label synthetic questions and chunk IDs.
 - [ ] Use LLM-as-a-Judge technique to evaluate the questions generated for a synthetic Q&A (dataset).

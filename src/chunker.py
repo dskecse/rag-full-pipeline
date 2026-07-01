@@ -3,8 +3,16 @@ from dataclasses import dataclass
 import re
 import uuid
 
+import nltk
 from pydantic import BaseModel
 import spacy
+
+
+# Download required NLTK data
+try:
+    nltk.data.find("tokenizers/punkt_tab")
+except LookupError:
+    nltk.download("punkt_tab")
 
 
 class Chunk(BaseModel):
@@ -67,6 +75,9 @@ class FixedSizeChunker(TextChunker):
 class SentenceChunker(TextChunker):
     """Chunks text by sentences."""
 
+    def __init__(self):
+        self.sentence_tokenizer = nltk.data.load("tokenizers/punkt_tab/english.pickle")
+
     def chunk_text(self, pages: list[dict[str, any]],
                    max_sentences: int = 3) -> list[Chunk]:
         """Chunk text by sentences."""
@@ -80,7 +91,7 @@ class SentenceChunker(TextChunker):
             if not text.strip():
                 continue
 
-            sentences = re.split(r'(?<=[.!?])\s+', text)
+            sentences = self.sentence_tokenizer.tokenize(text)
             current_chunk = []
 
             for sentence in sentences:
