@@ -4,6 +4,7 @@ import re
 import uuid
 
 import nltk
+from nltk.tokenize.punkt import PunktTokenizer
 from pydantic import BaseModel
 import spacy
 
@@ -76,7 +77,7 @@ class SentenceChunker(TextChunker):
     """Chunks text by sentences."""
 
     def __init__(self):
-        self.sentence_tokenizer = nltk.data.load("tokenizers/punkt_tab/english.pickle")
+        self.sentence_tokenizer = PunktTokenizer()
 
     def chunk_text(self, pages: list[dict[str, any]],
                    max_sentences: int = 3) -> list[Chunk]:
