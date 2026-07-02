@@ -5,6 +5,7 @@ from pprint import pprint
 
 from src.pdf_processor import PDFProcessor
 from src.chunker import Chunk, Chunker
+from src.settings import settings
 
 _all_parsers = [
     "docling",
@@ -28,11 +29,11 @@ def _print_chunking_summary(chunks: list[Chunk]) -> None:
 
 def _save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
     # Create a directory (do not raise if already present)
-    os.makedirs(os.path.join("data", "extracted_texts"), exist_ok=True)
+    os.makedirs(os.path.join(settings.data_dir, "extracted_texts"), exist_ok=True)
 
     orig_filename_without_ext = Path(orig_filename).stem
     new_filename = f"{parser}_{orig_filename_without_ext}.json"
-    output_path = os.path.join("data", "extracted_texts", new_filename)
+    output_path = os.path.join(settings.data_dir, "extracted_texts", new_filename)
 
     with open(output_path, "w", encoding="utf-8") as file:
         json.dump(pages, file, indent=2, ensure_ascii=False)
@@ -42,9 +43,9 @@ def _save_extracted_text(pages: list, parser: str, orig_filename: str) -> None:
 
 def _save_chunks(chunks: list[Chunk], filename: str) -> None:
     # Create a directory (do not raise if already present)
-    os.makedirs(os.path.join("data", "chunks"), exist_ok=True)
+    os.makedirs(os.path.join(settings.data_dir, "chunks"), exist_ok=True)
 
-    output_path = os.path.join("data", "chunks", filename)
+    output_path = os.path.join(settings.data_dir, "chunks", filename)
 
     serialized_chunks = []
     for chunk in chunks:
@@ -56,7 +57,8 @@ def _save_chunks(chunks: list[Chunk], filename: str) -> None:
     print(f"Saved {len(chunks)} chunks to {output_path}")
 
 
-def extract_text_from_pdf(pdf_path: str = "fy10syb.pdf", parsers: list[str] = _all_parsers) -> dict[str, list]:
+def extract_text_from_pdf(pdf_path: str = settings.pdf_path,
+                          parsers: list[str] = _all_parsers) -> dict[str, list]:
     """
     Extract text from a PDF using different parsers for comparison later.
     """
@@ -134,6 +136,5 @@ def perform_chunking(pages: dict[str, list]) -> dict[str, list[Chunk]]:
 
 
 if __name__ == "__main__":
-    pdf_path = "fy10syb.pdf"
-    pages_by_parser = extract_text_from_pdf(pdf_path=pdf_path)
+    pages_by_parser = extract_text_from_pdf()
     chunk_sets = perform_chunking(pages=pages_by_parser)
